@@ -1,6 +1,6 @@
-import { LoginCredentialsDto } from './dto/login-credentials.dto';
+import { LoginCredentialsDto } from './dto/login-creditials.dto';
 import { UserDto } from './../user/dto/user.dto';
-import { RegisterCredentialsDto } from './dto/register-credentials.dto';
+import { RegisterCredentialsDto } from './dto/register-creditials.dto';
 import { User } from './../user/user.model';
 import {
   Injectable,
@@ -38,9 +38,7 @@ export class AuthService {
     const user = new User();
     user.email = email;
     user.password = bcrypt.hashSync(password, 10);
-    user.firstName = registerCredentialsDto.firstName;
-    user.lastName = registerCredentialsDto.lastName;
-    user.phone = registerCredentialsDto.phone;
+
     try {
       user.save();
       return plainToClass(UserDto, user);
