@@ -1,18 +1,4 @@
-import {
-  IsString,
-  IsEmail,
-  IsInt,
-  Min,
-  Max,
-  Length,
-  IsDate,
-  IsArray,
-  ArrayNotEmpty,
-  ValidateNested,
-  IsUrl,
-  MinLength,
-  MaxLength,
-} from 'class-validator';
+import { IsString, MinLength, MaxLength } from 'class-validator';
 
 export class TasksDto {
   @IsString()

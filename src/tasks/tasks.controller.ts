@@ -20,39 +20,40 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  getHello(): Task[] {
+  async getTasks(): Promise<Task[]> {
     return this.tasksService.getTasks();
   }
 
   @Get('/:id')
-  getOneById(@Param('id') taskId: string): Task {
+  async getOneById(@Param('id') taskId: string): Promise<Task> {
     return this.tasksService.getOneById(taskId);
   }
 
   @Post()
   @UsePipes(new ValidationPipe())
-  createTask(@Body() taskDto: TasksDto) {
+  async createTask(@Body() taskDto: TasksDto): Promise<Task> {
     return this.tasksService.createTask(taskDto);
   }
+
   @Delete('/:id')
-  deleteTask(@Param('id') taskId: string): Task[] {
-    const tasks = this.tasksService.deleteTask(taskId);
-    return tasks;
+  async deleteTask(@Param('id') taskId: string): Promise<void> {
+    await this.tasksService.deleteTask(taskId);
   }
 
   @Put('/:id')
-  updateTask(@Param('id') taskId: string, @Body() updateTask: TasksDto) {
-    const tasks = this.tasksService.updateTask({ id: taskId, ...updateTask });
-    return tasks;
+  async updateTask(
+    @Param('id') taskId: string,
+    @Body() updateTask: TasksDto,
+  ): Promise<Task> {
+    return this.tasksService.updateTask({ id: taskId, ...updateTask });
   }
 
   @Patch('/:id/status')
-  updateTasksStatus(
+  async updateTasksStatus(
     @Param('id') taskId: string,
     @Body() updateTaskStatusDto: UpdateTaskStatusDto,
-  ) {
+  ): Promise<Task> {
     const { status } = updateTaskStatusDto;
-    const tasks = this.tasksService.updateTasksStatus(taskId, status);
-    return tasks;
+    return this.tasksService.updateTasksStatus(taskId, status);
   }
 }

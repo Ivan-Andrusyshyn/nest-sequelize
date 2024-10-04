@@ -1,54 +1,59 @@
 import { Injectable } from '@nestjs/common';
-import { Task, RequestTask } from 'src/tasks/interfaces/task.interface';
+import { InjectModel } from '@nestjs/sequelize';
+import { Task as TaskModel } from './task.model';
 import { TaskStatus } from './task-status.enum';
+import { RequestTask, Task } from 'src/tasks/interfaces/task.interface';
 
 @Injectable()
 export class TasksService {
-  private tasks: Task[] = [
-    { id: '1', title: 'test1', description: 'test desc1', status: 'OPEN' },
-    { id: '2', title: 'test2', description: 'test desc2', status: 'OPEN' },
-  ];
+  constructor(
+    @InjectModel(TaskModel) private readonly taskModel: typeof TaskModel,
+  ) {}
 
-  getTasks(): Task[] {
-    return this.tasks;
+  async getTasks(): Promise<TaskModel[]> {
+    return this.taskModel.findAll();
   }
 
-  createTask(reqTask: RequestTask): Task[] {
-    const task = {
-      id: new Date().toISOString(),
-      status: 'OPEN',
-      ...reqTask,
-    };
-    this.tasks.push(task);
-    return this.tasks;
+  async createTask(reqTask: RequestTask): Promise<TaskModel> {
+    const task = new this.taskModel({
+      title: reqTask.title,
+      description: reqTask.description,
+      status: TaskStatus.OPEN,
+    });
+    return task.save();
   }
 
-  getOneById(taskId: string): Task {
-    const tasksIndex = this.tasks.findIndex((task) => task.id === taskId);
-    return this.tasks[tasksIndex];
+  async getOneById(taskId: string): Promise<TaskModel> {
+    return this.taskModel.findByPk(taskId);
   }
 
-  deleteTask(taskId: string): Task[] {
-    const tasksIndex = this.tasks.findIndex((task) => task.id === taskId);
-
-    if (tasksIndex !== -1) {
-      this.tasks.splice(tasksIndex, 1);
+  async deleteTask(taskId: string): Promise<void> {
+    const task = await this.getOneById(taskId);
+    if (task) {
+      await task.destroy();
     }
-    return this.tasks;
   }
 
-  updateTasksStatus(taskId: string, status: TaskStatus): Task {
-    const tasksIndex = this.tasks.findIndex((task) => task.id === taskId);
-    this.tasks[tasksIndex].status = status;
-    return this.tasks[tasksIndex];
+  async updateTasksStatus(
+    taskId: string,
+    status: TaskStatus,
+  ): Promise<TaskModel> {
+    const task = await this.getOneById(taskId);
+    if (task) {
+      task.status = status;
+      await task.save();
+    }
+    return task;
   }
 
-  updateTask(updatedTask: Task): Task[] {
-    const tasksIndex = this.tasks.findIndex(
-      (task) => task.id === updatedTask.id,
-    );
-
-    this.tasks[tasksIndex] = updatedTask;
-    return this.tasks;
+  async updateTask(updatedTask: Task): Promise<TaskModel> {
+    const task = await this.getOneById(updatedTask.id);
+    if (task) {
+      task.title = updatedTask.title;
+      task.description = updatedTask.description;
+      task.status = updatedTask.status;
+      await task.save();
+    }
+    return task;
   }
 }

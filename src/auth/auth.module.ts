@@ -6,12 +6,15 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from 'src/user/user.model';
+import dotenv from 'dotenv';
+import { env } from 'process';
+dotenv.config();
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: 'secretKey',
+      secret: env.JWT_KEY,
       signOptions: {
         expiresIn: 3600 * 24, //1day
       },
