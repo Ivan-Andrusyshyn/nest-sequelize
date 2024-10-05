@@ -1,8 +1,9 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from './dto/user.dto';
-import { User } from './user.model';
+import { User } from '../models/user.model';
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -38,18 +39,28 @@ export class UserService {
     await user.destroy();
 
     return Promise.resolve({
-      status: 'succes',
+      status: 'success',
     });
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserDto> {
     const { username, email, role, password } = createUserDto;
-    const user = new User();
-    user.email = email;
-    user.username = username;
-    user.role = role;
-    user.password = bcrypt.hashSync(password, 10);
-    return user.save();
+
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    const user = await this.userModel.create({
+      email: email,
+      username: username,
+      role: role,
+      password: bcrypt.hashSync(password, 8),
+    });
+
+    user.save();
+
+    return new UserDto(user);
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {

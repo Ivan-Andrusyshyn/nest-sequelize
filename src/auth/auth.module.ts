@@ -5,19 +5,21 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { User } from 'src/user/user.model';
-import dotenv from 'dotenv';
-import { env } from 'process';
-dotenv.config();
+import { User } from 'src/models/user.model';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: env.JWT_KEY,
-      signOptions: {
-        expiresIn: 3600 * 24, //1day
-      },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_KEY'),
+        signOptions: {
+          expiresIn: 3600 * 24, // 1 день
+        },
+      }),
+      inject: [ConfigService],
     }),
     SequelizeModule.forFeature([User]),
   ],

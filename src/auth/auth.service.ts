@@ -1,7 +1,7 @@
 import { LoginCredentialsDto } from './dto/login-creditials.dto';
 import { UserDto } from './../user/dto/user.dto';
 import { RegisterCredentialsDto } from './dto/register-creditials.dto';
-import { User } from './../user/user.model';
+import { User } from '../models/user.model';
 import {
   Injectable,
   Logger,
@@ -25,8 +25,8 @@ export class AuthService {
 
   async signUp(
     registerCredentialsDto: RegisterCredentialsDto,
-  ): Promise<UserDto> {
-    const { email, password } = registerCredentialsDto;
+  ): Promise<{ user: UserDto; token: string }> {
+    const { username, email, password, role } = registerCredentialsDto;
 
     const existedUser = await this.userModel.findOne({
       where: { email: email },
@@ -37,11 +37,18 @@ export class AuthService {
 
     const user = new User();
     user.email = email;
+    user.username = username;
+    user.role = role;
     user.password = bcrypt.hashSync(password, 10);
-
     try {
       user.save();
-      return plainToClass(UserDto, user);
+      const payload = { email: user.email };
+      const token = this.jwtService.sign(payload);
+
+      return {
+        user: plainToClass(UserDto, user),
+        token,
+      };
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new InternalServerErrorException('somethings went wrong');
@@ -50,13 +57,14 @@ export class AuthService {
 
   async signIn(
     loginCredentialsDto: LoginCredentialsDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ user: UserDto; token: string }> {
     const { email, password } = loginCredentialsDto;
     const user = await this.userModel.findOne({
       where: {
-        email: email,
+        email,
       },
     });
+    console.log(user);
 
     if (!user) {
       throw new BadRequestException('Invalid credentials');
@@ -68,11 +76,14 @@ export class AuthService {
 
     const payload: JwtPayload = { id: user.id, email: user.email };
 
-    const accessToken = await this.jwtService.sign(payload);
+    const token = await this.jwtService.sign(payload);
     this.logger.debug(
       `Generated JWT Token with payload ${JSON.stringify(payload)}`,
     );
-    return { accessToken };
+    return {
+      user: plainToClass(UserDto, user),
+      token,
+    };
   }
 
   getAuthenticatedUser(user: User): UserDto {

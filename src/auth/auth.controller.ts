@@ -11,7 +11,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard, AuthUser } from 'src/common';
-import { User } from 'src/user/user.model';
+import { User } from 'src/models/user.model';
 
 @Controller('auth')
 export class AuthController {
@@ -20,14 +20,14 @@ export class AuthController {
   @Post('/signup')
   signUp(
     @Body(ValidationPipe) registerCredentialsDto: RegisterCredentialsDto,
-  ): Promise<UserDto> {
+  ): Promise<{ user: UserDto; token: string }> {
     return this.authService.signUp(registerCredentialsDto);
   }
 
   @Post('/signin')
   signIn(
     @Body(ValidationPipe) loginCredentialsDto: LoginCredentialsDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ token: string }> {
     return this.authService.signIn(loginCredentialsDto);
   }
 

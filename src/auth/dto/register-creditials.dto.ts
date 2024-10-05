@@ -6,7 +6,9 @@ import {
   IsEmail,
   IsOptional,
   IsDefined,
+  IsIn,
 } from 'class-validator';
+import { UserRole } from 'src/user/user-role.enum';
 
 export class RegisterCredentialsDto {
   @IsEmail()
@@ -29,5 +31,6 @@ export class RegisterCredentialsDto {
   readonly password: string;
 
   @IsOptional()
-  phone: string;
+  @IsIn([UserRole.ADMIN, UserRole.USER])
+  role: UserRole;
 }
