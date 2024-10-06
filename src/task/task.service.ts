@@ -1,37 +1,73 @@
 import { Injectable } from '@nestjs/common';
-import { TaskRepository } from './task.repository';
-import { RequestTask, Task } from './interfaces/task.interface';
 import { TaskStatus } from './task-status.enum';
+import { InjectModel } from '@nestjs/sequelize';
+import {
+  RequestTask,
+  Task as TaskInterface,
+} from 'src/task/interfaces/task.interface';
+import { TaskModel } from 'src/models/task.model';
 
 @Injectable()
 export class TaskService {
-  constructor(private readonly taskRepository: TaskRepository) {}
+  constructor(
+    @InjectModel(TaskModel) private readonly taskModel: typeof TaskModel,
+  ) {}
 
-  async getTasksForUser(userId: string): Promise<any[]> {
-    return this.taskRepository.getTasks(userId);
+  async getTasksForUser(userId: string): Promise<TaskInterface[]> {
+    return this.taskModel.findAll({ where: { userId } });
   }
 
-  async createTask(userId: string, reqTask: RequestTask): Promise<any> {
-    return this.taskRepository.createTask(userId, reqTask);
+  async createTask(
+    userId: string,
+    reqTask: RequestTask,
+  ): Promise<TaskInterface> {
+    const task = new TaskModel();
+
+    task.title = reqTask.title;
+    task.description = reqTask.description;
+    task.status = TaskStatus.OPEN;
+    task.userId = userId;
+
+    return task.save();
   }
 
-  async getOneById(taskId: number, userId: string): Promise<any | null> {
-    return this.taskRepository.getOneById(taskId, userId);
+  async getOneById(taskId: number, userId: string): Promise<TaskModel | null> {
+    return this.taskModel.findOne({ where: { id: taskId, userId } });
   }
 
   async deleteTask(taskId: number, userId: string): Promise<void> {
-    await this.taskRepository.deleteTask(taskId, userId);
+    const task = await this.getOneById(taskId, userId);
+    if (task) {
+      await task.destroy();
+    }
   }
 
-  async updateTask(updatedTask: Task, userId: string): Promise<any | null> {
-    return this.taskRepository.updateTask(updatedTask, userId);
+  async updateTask(
+    updatedTask: TaskInterface,
+    userId: string,
+  ): Promise<TaskInterface | null> {
+    const task = await this.getOneById(updatedTask.id, userId);
+    if (task) {
+      task.title = updatedTask.title;
+      task.description = updatedTask.description;
+      task.status = updatedTask.status;
+      await task.save();
+      return task;
+    }
+    return null;
   }
 
   async updateTasksStatus(
     taskId: number,
     status: TaskStatus,
     userId: string,
-  ): Promise<any | null> {
-    return this.taskRepository.updateTasksStatus(taskId, status, userId); // Include userId in the repository call
+  ): Promise<TaskInterface | null> {
+    const task = await this.getOneById(taskId, userId);
+    if (task) {
+      task.status = status;
+      await task.save();
+      return task;
+    }
+    return null;
   }
 }
