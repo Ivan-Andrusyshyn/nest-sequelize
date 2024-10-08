@@ -3,6 +3,7 @@ import { TaskStatus } from './task-status.enum';
 import { InjectModel } from '@nestjs/sequelize';
 import {
   RequestTask,
+  Task,
   Task as TaskInterface,
 } from 'src/task/interfaces/task.interface';
 import { TaskModel } from 'src/models/task.model';
@@ -52,7 +53,7 @@ export class TaskService {
       task.description = updatedTask.description;
       task.status = updatedTask.status;
       await task.save();
-      return task;
+      return this.mapTaskModelToTask(task);
     }
     return null;
   }
@@ -61,13 +62,23 @@ export class TaskService {
     taskId: number,
     status: TaskStatus,
     userId: string,
-  ): Promise<TaskInterface | null> {
+  ): Promise<Task | null> {
     const task = await this.getOneById(taskId, userId);
     if (task) {
       task.status = status;
       await task.save();
-      return task;
+      return this.mapTaskModelToTask(task);
     }
     return null;
+  }
+
+  private mapTaskModelToTask(taskModel: TaskModel): Task {
+    return {
+      id: taskModel.id,
+      title: taskModel.title,
+      description: taskModel.description,
+      status: taskModel.status,
+      userId: taskModel.userId,
+    };
   }
 }
