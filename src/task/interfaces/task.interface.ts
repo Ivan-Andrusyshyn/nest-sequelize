@@ -2,7 +2,7 @@ export interface RequestTask {
   title: string;
   description: string;
   status: string;
-  userId?: string;
+  userId?: number;
 }
 
 export interface Task extends RequestTask {

@@ -18,7 +18,7 @@ export class TaskService {
   }
 
   async createTask(
-    userId: string,
+    userId: number,
     reqTask: RequestTask,
   ): Promise<TaskInterface> {
     const task = new TaskModel();
