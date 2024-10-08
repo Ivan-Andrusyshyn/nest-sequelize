@@ -19,7 +19,7 @@ import { TaskModel } from './task.model';
 export class User extends Model {
   @PrimaryKey
   @AutoIncrement
-  @Column
+  @Column(DataType.BIGINT)
   id: number;
 
   @Column

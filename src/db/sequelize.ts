@@ -17,6 +17,7 @@ export const sequelizeConfig = [
       database: configService.get('DB_NAME'),
       models: [User, TaskModel],
       autoLoadModels: true,
+      logging: console.log,
     }),
   }),
 ];

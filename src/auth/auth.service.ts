@@ -35,22 +35,27 @@ export class AuthService {
       throw new BadRequestException('this email is already used.');
     }
     try {
-      const user = new User();
-      user.email = email;
-      user.username = username;
-      user.role = role;
-      user.password = bcrypt.hashSync(password, 10);
-      user.save();
-      const payload = { email: user.email };
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      const newUser = await this.userModel.create({
+        username,
+        email,
+        password: hashedPassword,
+        role,
+      });
+
+      const payload = { email: newUser.email };
       const token = this.jwtService.sign(payload);
 
+      console.log(newUser);
+
       return {
-        user: plainToClass(UserDto, user),
+        user: plainToClass(UserDto, newUser),
         token,
       };
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new InternalServerErrorException('somethings went wrong');
+      throw new InternalServerErrorException('Something went wrong');
     }
   }
 
