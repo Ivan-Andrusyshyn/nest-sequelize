@@ -11,7 +11,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = +configService.get<number>('DB_PORT');
 
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+  });
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.use(helmet());
