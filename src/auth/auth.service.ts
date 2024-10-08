@@ -34,13 +34,12 @@ export class AuthService {
     if (existedUser) {
       throw new BadRequestException('this email is already used.');
     }
-
-    const user = new User();
-    user.email = email;
-    user.username = username;
-    user.role = role;
-    user.password = bcrypt.hashSync(password, 10);
     try {
+      const user = new User();
+      user.email = email;
+      user.username = username;
+      user.role = role;
+      user.password = bcrypt.hashSync(password, 10);
       user.save();
       const payload = { email: user.email };
       const token = this.jwtService.sign(payload);

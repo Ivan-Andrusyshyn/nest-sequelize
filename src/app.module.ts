@@ -6,16 +6,16 @@ import { AppService } from './app.service';
 import { TaskModule } from './task/task.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { config } from './config/config.development';
-import { sequelizeConfig } from './db/sequalize.config';
+import { sequelizeConfig } from './db/sequelize';
 import { LoggerMiddleware } from './logger.middleware';
+import { configValidationSchema } from './config.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      expandVariables: true,
-      load: [config],
+      envFilePath: [`.env.stage.${process.env.STAGE}`],
+      validationSchema: configValidationSchema,
     }),
     ...sequelizeConfig,
     TaskModule,

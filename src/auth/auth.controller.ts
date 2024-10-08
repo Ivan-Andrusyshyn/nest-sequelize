@@ -4,7 +4,6 @@ import { UserDto } from './../user/dto/user.dto';
 import { AuthService } from './auth.service';
 import {
   Controller,
-  Get,
   Post,
   UseGuards,
   Body,
@@ -31,7 +30,7 @@ export class AuthController {
     return this.authService.signIn(loginCredentialsDto);
   }
 
-  @Get('/authenticated')
+  @Post('/authenticated')
   @UseGuards(AuthGuard)
   getAuthenticatedUser(@AuthUser() user: User): UserDto {
     return this.authService.getAuthenticatedUser(user);

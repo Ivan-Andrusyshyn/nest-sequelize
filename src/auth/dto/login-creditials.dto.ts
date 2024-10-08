@@ -11,7 +11,7 @@ export class LoginCredentialsDto {
   @IsDefined()
   @IsString()
   @IsEmail()
-  @MaxLength(50)
+  @MaxLength(24, { message: 'Your email is too long!' })
   readonly email: string;
 
   @IsDefined()

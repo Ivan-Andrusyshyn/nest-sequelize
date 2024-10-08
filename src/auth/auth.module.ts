@@ -13,13 +13,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_KEY'),
         signOptions: {
           expiresIn: 3600 * 24, // 1 день
         },
       }),
-      inject: [ConfigService],
     }),
     SequelizeModule.forFeature([User]),
   ],
