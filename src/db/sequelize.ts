@@ -1,6 +1,7 @@
 import { SequelizeModule } from '@nestjs/sequelize';
-import { User } from 'src/models/user.model';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { User } from 'src/models/user.model';
 import { TaskModel } from 'src/models/task.model';
 
 export const sequelizeConfig = [

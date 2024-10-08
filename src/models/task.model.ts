@@ -39,7 +39,7 @@ export class TaskModel extends Model {
 
   @ForeignKey(() => User)
   @Column
-  userId: string;
+  userId: number;
 
   @BelongsTo(() => User)
   user: User;
